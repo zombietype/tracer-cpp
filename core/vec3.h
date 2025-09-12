@@ -66,6 +66,8 @@ public:
 
 	inline vec3 normalized() const { return *this * (1.0f / length()); }
 
+	inline vec3 abs() const { return vec3(std::abs(e[0]), std::abs(e[1]), std::abs(e[2])); }
+
 	inline const vec3 &normalize() { return *this *= (1.0f / length()); }
 };
 
@@ -81,6 +83,10 @@ inline vec3 normalize(const vec3 &vec) {
 	return vec.normalized();
 }
 
+inline vec3 abs(const vec3 &vec) {
+	return vec.abs();
+}
+
 inline float dot(const vec3 &a, const vec3 &b) {
 	return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 }
@@ -89,12 +95,12 @@ inline vec3 pow(const vec3 &a, float ex) {
 	return vec3(powf32(a.x(), ex), powf32(a.y(), ex), powf32(a.z(), ex));
 }
 
-inline vec3 pow(const vec3 &a, const vec3& ex) {
-  return vec3(powf32(a.x(), ex.x()), powf32(a.y(), ex.y()), powf32(a.z(), ex.z()));
+inline vec3 pow(const vec3 &a, const vec3 &ex) {
+	return vec3(powf32(a.x(), ex.x()), powf32(a.y(), ex.y()), powf32(a.z(), ex.z()));
 }
 
 inline vec3 exp(const vec3 &a) {
-  return vec3(exp(a.x()), exp(a.y()), exp(a.z()));
+	return vec3(exp(a.x()), exp(a.y()), exp(a.z()));
 }
 
 inline vec3 cross(const vec3 &a, const vec3 &b) {

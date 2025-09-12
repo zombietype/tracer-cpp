@@ -1,4 +1,5 @@
 #include "environment/skybox.h"
+#include "geometry/instance.h"
 #include "geometry/volume.h"
 #include "thirdparty/stbi_write.h"
 #include "thirdparty/thread_pool.h"
@@ -63,7 +64,7 @@ vec3 color(const ray &r, const hitable *world, const skybox *sky, int depth) {
 		ray scattered;
 		vec3 emission = rec.mat->emission(rec.u, rec.v, rec.p);
 		if (rec.mat->scatter(r, rec, attenuation, scattered)) {
-          return emission + attenuation * color(scattered, world, sky, depth - 1);
+			return emission + attenuation * color(scattered, world, sky, depth - 1);
 		} else {
 			return emission;
 		}
@@ -135,14 +136,14 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-    skybox sky("assets/OvercastSoil.hdr");
+	skybox sky("assets/OvercastSoil.hdr");
 
 	world wrld;
 	wrld.add(std::make_shared<sphere>(vec3(-1, 0, 0), 0.5f, std::make_shared<dielectric>(1.5f)));
 	wrld.add(std::make_shared<constant_medium>(std::make_shared<sphere>(vec3(-1, 0, 0), 0.45f, std::make_shared<lambertian>(std::make_shared<constant_texture>(vec3(0.8f, 0.2f, 0.1f)))), 0.99f));
 	wrld.add(std::make_shared<sphere>(vec3(0, 0, 0.0f), 0.02f, std::make_shared<lambertian>(std::make_shared<constant_texture>(vec3(0.8f)), vec3(10.0f))));
 	wrld.add(std::make_shared<sphere>(vec3(1, 0, 0), 0.5f, std::make_shared<metallic>(vec3(0.8f, 0.6f, 0.2f), 0.2f)));
-	wrld.add(std::make_shared<sphere>(vec3(0, -100.5f, 0), 100.0f, std::make_shared<lambertian>(std::make_shared<checker_texture>(vec3(1.0f), vec3(0.0f), vec3(10.0f)))));
+	wrld.add(std::make_shared<instance>(std::make_shared<sphere>(vec3(), 1.0f, std::make_shared<lambertian>(std::make_shared<checker_texture>(vec3(1.0f), vec3(0.0f), vec3(10.0f)))), transform(quat(), vec3(0.0f, -100.5f, 0.0f), 100.0f)));
 	wrld.add(std::make_shared<mesh>(verts, std::make_shared<metallic>(vec3(1.0f), 0.0f)));
 
 	wrld.compile();

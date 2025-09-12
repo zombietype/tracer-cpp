@@ -18,9 +18,9 @@ static std::vector<int> perm_gen() {
 		retval[i] = i;
 	}
 
-    std::random_device rd;
-    std::mt19937 g(rd());
- 
+	std::random_device rd;
+	std::mt19937 g(rd());
+
 	std::shuffle(retval.begin(), retval.end(), g);
 	return retval;
 }

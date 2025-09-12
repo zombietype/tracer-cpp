@@ -6,7 +6,7 @@
 
 class dielectric : public material {
 	float refractive_index;
-  
+
 	float schlick(float cosine, float ref_idx) const;
 
 public:

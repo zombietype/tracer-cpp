@@ -111,12 +111,46 @@
       "-I.",
       "-Ithreadpool",
       "-o",
+      "geometry/mesh.o",
+      "geometry/mesh.cpp"
+    ],
+    "directory": "/home/bob/Play/tracer-cpp",
+    "file": "/home/bob/Play/tracer-cpp/geometry/mesh.cpp",
+    "output": "/home/bob/Play/tracer-cpp/geometry/mesh.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-std=c++20",
+      "-g",
+      "-Wall",
+      "-I.",
+      "-Ithreadpool",
+      "-o",
       "geometry/sphere.o",
       "geometry/sphere.cpp"
     ],
     "directory": "/home/bob/Play/tracer-cpp",
     "file": "/home/bob/Play/tracer-cpp/geometry/sphere.cpp",
     "output": "/home/bob/Play/tracer-cpp/geometry/sphere.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-std=c++20",
+      "-g",
+      "-Wall",
+      "-I.",
+      "-Ithreadpool",
+      "-o",
+      "geometry/instance.o",
+      "geometry/instance.cpp"
+    ],
+    "directory": "/home/bob/Play/tracer-cpp",
+    "file": "/home/bob/Play/tracer-cpp/geometry/instance.cpp",
+    "output": "/home/bob/Play/tracer-cpp/geometry/instance.o"
   },
   {
     "arguments": [
@@ -230,11 +264,11 @@
       "-I.",
       "-Ithreadpool",
       "-o",
-      "stb/stbi_write.o",
-      "stb/stbi_write.cpp"
+      "thirdparty/impl.o",
+      "thirdparty/impl.cpp"
     ],
     "directory": "/home/bob/Play/tracer-cpp",
-    "file": "/home/bob/Play/tracer-cpp/stb/stbi_write.cpp",
-    "output": "/home/bob/Play/tracer-cpp/stb/stbi_write.o"
+    "file": "/home/bob/Play/tracer-cpp/thirdparty/impl.cpp",
+    "output": "/home/bob/Play/tracer-cpp/thirdparty/impl.o"
   }
 ]
