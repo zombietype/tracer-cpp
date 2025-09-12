@@ -5,6 +5,7 @@
 #include "core/bvh.h"
 #include "core/hitable.h"
 #include "shape.h"
+#include <filesystem>
 #include <memory>
 
 class triangle : public hitable {
@@ -38,5 +39,7 @@ public:
 
 	const aabb &get_aabb() const override;
 };
+
+mesh import_obj(const std::filesystem::path& filepath, std::shared_ptr<material> mat);
 
 #endif // _MESH_H

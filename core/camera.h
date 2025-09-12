@@ -4,6 +4,7 @@
 
 #include "ray.h"
 #include "rng.h"
+#include "constants.h"
 
 class camera {
 private:

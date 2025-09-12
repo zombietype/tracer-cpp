@@ -1,4 +1,7 @@
 #include "mesh.h"
+#include <filesystem>
+
+#include "thirdparty/fast_obj.h"
 
 vec3 triangle::get_normal(float u, float v) const {
 	return normalize(cross(vert0 - vert1, vert2 - vert1));
@@ -117,4 +120,49 @@ bool mesh::hit(const ray &r, float t_min, float t_max, hit_record &rec) const {
 
 const aabb &mesh::get_aabb() const {
 	return box;
+}
+
+mesh import_obj(const std::filesystem::path &path, std::shared_ptr<material> mat) {
+	fastObjMesh *obj = fast_obj_read(path.c_str());
+	assert(obj);
+
+	size_t index_count = 0;
+    std::vector<vec3> vertices;
+
+	for (unsigned int i = 0; i < obj->face_count; ++i)
+		index_count += 3 * (obj->face_vertices[i] - 2);
+
+	vertices.resize(index_count);
+
+	size_t vertex_offset = 0;
+	size_t index_offset = 0;
+
+	for (unsigned int i = 0; i < obj->face_count; ++i) {
+		for (unsigned int j = 0; j < obj->face_vertices[i]; ++j) {
+			fastObjIndex gi = obj->indices[index_offset + j];
+
+			// triangulate polygon on the fly; offset-3 is always the first polygon vertex
+			if (j >= 3) {
+				vertices[vertex_offset + 0] = vertices[vertex_offset - 3];
+				vertices[vertex_offset + 1] = vertices[vertex_offset - 1];
+				vertex_offset += 2;
+			}
+
+			vec3 &v = vertices[vertex_offset++];
+
+			v[0] = obj->positions[gi.p * 3 + 0];
+			v[1] = obj->positions[gi.p * 3 + 1];
+			v[2] = obj->positions[gi.p * 3 + 2];
+		}
+
+		index_offset += obj->face_vertices[i];
+	}
+
+	assert(vertex_offset == index_count);
+
+    mesh loaded(vertices, std::move(mat));
+
+	fast_obj_destroy(obj);
+
+    return loaded;
 }
