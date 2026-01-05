@@ -13,8 +13,8 @@ class vec3 {
 public:
 	constexpr vec3() :
 			vec3(0.0f) {}
-	constexpr vec3(float x) :
-			vec3(x, x, x) {}
+	constexpr vec3(float scalar) :
+			vec3(scalar, scalar, scalar) {}
 	constexpr vec3(float x, float y, float z) {
 		e[0] = x;
 		e[1] = y;
@@ -71,6 +71,7 @@ public:
 	inline const vec3 &normalize() { return *this *= (1.0f / length()); }
 };
 
+using color = vec3;
 inline vec3 operator*(float f, const vec3 &vec) {
 	return vec * f;
 }

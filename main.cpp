@@ -33,7 +33,7 @@ vec3 tonemap(const vec3 &color) {
 	return col;
 }
 
-vec3 color(const ray &r, const hitable *world, int depth) {
+vec3 pixel_color(const ray &r, const hitable *world, int depth) {
 	hit_record rec;
 	if (depth == 0) {
 		return vec3(0.0f);
@@ -43,7 +43,7 @@ vec3 color(const ray &r, const hitable *world, int depth) {
 		ray scattered;
 		vec3 emission = rec.mat->emission(rec.u, rec.v, rec.p);
 		if (rec.mat->scatter(r, rec, attenuation, scattered)) {
-			return emission + attenuation * color(scattered, world, depth - 1);
+			return emission + attenuation * pixel_color(scattered, world, depth - 1);
 		} else {
 			return emission;
 		}
@@ -54,7 +54,7 @@ vec3 color(const ray &r, const hitable *world, int depth) {
 	}
 }
 
-vec3 color(const ray &r, const hitable *world, const skybox *sky, int depth) {
+vec3 pixel_color(const ray &r, const hitable *world, const skybox *sky, int depth) {
 	hit_record rec;
 	if (depth == 0) {
 		return vec3(0.0f);
@@ -64,13 +64,67 @@ vec3 color(const ray &r, const hitable *world, const skybox *sky, int depth) {
 		ray scattered;
 		vec3 emission = rec.mat->emission(rec.u, rec.v, rec.p);
 		if (rec.mat->scatter(r, rec, attenuation, scattered)) {
-			return emission + attenuation * color(scattered, world, sky, depth - 1);
+			return emission + attenuation * pixel_color(scattered, world, sky, depth - 1);
 		} else {
 			return emission;
 		}
 	} else {
 		return sky->sample(r.direction());
 	}
+}
+
+void create_custom_map(world *p_world) {
+	p_world->add(std::make_shared<sphere>(
+			vec3(-1, 0, 0),
+			0.5f,
+			std::make_shared<dielectric>(1.5f)));
+
+	p_world->add(std::make_shared<constant_medium>(
+			std::make_shared<sphere>(
+					vec3(-1, 0, 0),
+					0.45f,
+					std::make_shared<lambertian>(
+							std::make_shared<solid_color>(
+									vec3(0.8f, 0.2f, 0.1f)))),
+			0.99f));
+
+	p_world->add(std::make_shared<sphere>(
+			vec3(0, 0, 0),
+			0.05f,
+			std::make_shared<diffuse_light>(vec3(10.0f))));
+
+	p_world->add(std::make_shared<sphere>(
+			vec3(1, 0, 0),
+			0.5f,
+			std::make_shared<metallic>(
+					vec3(0.8f, 0.6f, 0.2f),
+					0.2f)));
+
+	p_world->add(std::make_shared<instance>(
+			std::make_shared<sphere>(vec3(),
+					1.0f,
+					std::make_shared<lambertian>(
+							std::make_shared<checker_texture>(
+									vec3(1.0f),
+									vec3(0.0f),
+									vec3(10.0f)))),
+			transform(
+					quat(),
+					vec3(0.0f, -100.5f, 0.0f),
+					100.0f)));
+
+	p_world->add(std::make_shared<instance>(
+			std::make_shared<mesh>(
+					import_obj(
+							"assets/dragon.obj",
+							std::make_shared<metallic>(
+									vec3(0.8f, 0.6f, 0.2f),
+									0.2f))),
+			transform(
+					quat(vec3(0, 1, 0),
+							-PI * 0.5f),
+					vec3(0, 0, 0.2f),
+					1.0f)));
 }
 
 int main(int argc, char *argv[]) {
@@ -139,13 +193,8 @@ int main(int argc, char *argv[]) {
 	// skybox sky("assets/OvercastSoil.hdr");
 
 	world wrld;
-	wrld.add(std::make_shared<sphere>(vec3(-1, 0, 0), 0.5f, std::make_shared<dielectric>(1.5f)));
-	wrld.add(std::make_shared<constant_medium>(std::make_shared<sphere>(vec3(-1, 0, 0), 0.45f, std::make_shared<lambertian>(std::make_shared<constant_texture>(vec3(0.8f, 0.2f, 0.1f)))), 0.99f));
-	wrld.add(std::make_shared<sphere>(vec3(0, 0, 0), 0.05f, std::make_shared<lambertian>(std::make_shared<constant_texture>(vec3(0.8f)), vec3(10.0f))));
-	wrld.add(std::make_shared<sphere>(vec3(1, 0, 0), 0.5f, std::make_shared<metallic>(vec3(0.8f, 0.6f, 0.2f), 0.2f)));
-	wrld.add(std::make_shared<instance>(std::make_shared<sphere>(vec3(), 1.0f, std::make_shared<lambertian>(std::make_shared<checker_texture>(vec3(1.0f), vec3(0.0f), vec3(10.0f)))), transform(quat(), vec3(0.0f, -100.5f, 0.0f), 100.0f)));
 
-	wrld.add(std::make_shared<instance>(std::make_shared<mesh>(import_obj("assets/dragon.obj", std::make_shared<metallic>(vec3(0.8f, 0.6f, 0.2f), 0.2f))), transform(quat(vec3(0,1,0), -PI*0.5f), vec3(0, 0, 0.2f), 1.0f)));
+	create_custom_map(&wrld);
 
 	wrld.compile();
 
@@ -179,7 +228,7 @@ int main(int argc, char *argv[]) {
 							float u = (x + rng()) / (float)config.WIDTH;
 							float v = (y + rng()) / (float)config.HEIGHT;
 							ray r = cam.get_ray(u, v);
-							ctile(i, j) += color(r, &wrld, config.MAX_DEPTH) / config.NSAMPLES;
+							ctile(i, j) += pixel_color(r, &wrld, config.MAX_DEPTH) / config.NSAMPLES;
 						}
 					}
 

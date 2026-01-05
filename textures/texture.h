@@ -15,11 +15,11 @@ public:
 	vec3 sample(float u, float v, const vec3 &point) const override { return vec3(0.0f); }
 };
 
-class constant_texture : public texture {
+class solid_color : public texture {
 	vec3 color;
 
 public:
-	constant_texture(const vec3 &color) :
+	solid_color(const vec3 &color) :
 			color(color) {}
 	vec3 sample(float u, float v, const vec3 &point) const override {
 		return color;

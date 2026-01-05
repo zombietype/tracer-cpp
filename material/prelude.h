@@ -3,3 +3,4 @@
 #include "lambertian.h"
 #include "material.h"
 #include "metallic.h"
+#include "diffuse_light.h"
