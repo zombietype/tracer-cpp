@@ -1,5 +1,6 @@
 #include "mesh.h"
 #include <filesystem>
+#include <memory>
 
 #include "thirdparty/fast_obj.h"
 
@@ -122,7 +123,7 @@ const aabb &mesh::get_aabb() const {
 	return box;
 }
 
-mesh import_obj(const std::filesystem::path &path, std::shared_ptr<material> mat) {
+std::shared_ptr<mesh> import_obj(const std::filesystem::path &path, std::shared_ptr<material> mat) {
 	fastObjMesh *obj = fast_obj_read(path.c_str());
 	assert(obj);
 
@@ -160,9 +161,40 @@ mesh import_obj(const std::filesystem::path &path, std::shared_ptr<material> mat
 
 	assert(vertex_offset == index_count);
 
-    mesh loaded(vertices, std::move(mat));
+    auto loaded = std::make_shared<mesh>(vertices, std::move(mat));
 
 	fast_obj_destroy(obj);
 
     return loaded;
+}
+
+std::shared_ptr<mesh> primitives::cuboid(const vec3 &min, const vec3 &max, std::shared_ptr<material> mat) {
+	float lo_x = min.x();
+	float lo_y = min.y();
+	float lo_z = min.z();
+	float hi_x = max.x();
+	float hi_y = max.y();
+	float hi_z = max.z();
+
+	auto vertices = std::vector{
+		vec3(lo_x, lo_y, lo_z),
+		vec3(hi_x, lo_y, lo_z),
+		vec3(hi_x, hi_y, lo_z),
+		vec3(lo_x, hi_y, lo_z),
+		vec3(lo_x, lo_y, hi_z),
+		vec3(hi_x, lo_y, hi_z),
+		vec3(hi_x, hi_y, hi_z),
+		vec3(lo_x, hi_y, hi_z),
+	};
+
+	auto indices = std::vector{
+		0, 1, 2, 2, 3, 0, // lo_z
+		4, 5, 6, 6, 7, 4, // hi_z
+		0, 3, 7, 7, 4, 0, // lo_x
+		1, 2, 6, 6, 5, 1, // hi_x
+		0, 1, 5, 5, 4, 0, // lo_y
+		3, 2, 6, 6, 7, 3, // hi_y
+	};
+    
+    return std::make_shared<mesh>(vertices, indices, std::move(mat));
 }

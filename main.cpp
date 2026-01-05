@@ -1,5 +1,6 @@
 #include "environment/skybox.h"
 #include "geometry/instance.h"
+#include "geometry/mesh.h"
 #include "geometry/volume.h"
 #include "thirdparty/stbi_write.h"
 #include "thirdparty/thread_pool.h"
@@ -48,9 +49,10 @@ vec3 pixel_color(const ray &r, const hitable *world, int depth) {
 			return emission;
 		}
 	} else {
-		vec3 unit_dir = normalize(r.direction());
-		float t = 0.5f * (unit_dir.y() + 1.0f);
-		return (1.0f - t) * vec3(1.0f) + t * vec3(0.5f, 0.7f, 1.0f);
+		return vec3(0.0f);
+		// vec3 unit_dir = normalize(r.direction());
+		// float t = 0.5f * (unit_dir.y() + 1.0f);
+		// return (1.0f - t) * vec3(1.0f) + t * vec3(0.5f, 0.7f, 1.0f);
 	}
 }
 
@@ -114,17 +116,104 @@ void create_custom_map(world *p_world) {
 					100.0f)));
 
 	p_world->add(std::make_shared<instance>(
-			std::make_shared<mesh>(
-					import_obj(
-							"assets/dragon.obj",
-							std::make_shared<metallic>(
-									vec3(0.8f, 0.6f, 0.2f),
-									0.2f))),
+			import_obj(
+					"assets/dragon.obj",
+					std::make_shared<metallic>(
+							vec3(0.8f, 0.6f, 0.2f),
+							0.2f)),
 			transform(
 					quat(vec3(0, 1, 0),
 							-PI * 0.5f),
 					vec3(0, 0, 0.2f),
 					1.0f)));
+}
+
+void create_cornell_box(world *p_world) {
+	using std::make_shared;
+
+	auto red = make_shared<lambertian>(
+			make_shared<solid_color>(color(.65, .05, .05)));
+	auto white = make_shared<lambertian>(
+			make_shared<solid_color>(color(.73, .73, .73)));
+	auto green = make_shared<lambertian>(
+			make_shared<solid_color>(color(.12, .45, .15)));
+	auto light = make_shared<diffuse_light>(color(15, 15, 15));
+
+	p_world->add(make_shared<mesh>(
+			std::vector{
+					vec3(555, 0, 0),
+					vec3(555, 555, 0),
+					vec3(555, 0, 555),
+					vec3(555, 555, 555) },
+			std::vector{ 0, 1, 2, 3, 2, 1 },
+			green));
+
+	p_world->add(make_shared<mesh>(
+			std::vector{
+					vec3(0, 0, 0),
+					vec3(0, 555, 0),
+					vec3(0, 0, 555),
+					vec3(0, 555, 555) },
+			std::vector{ 0, 1, 2, 3, 2, 1 },
+			red));
+
+	p_world->add(make_shared<mesh>(
+			std::vector{
+					vec3(343, 554, 332),
+					vec3(213, 554, 332),
+					vec3(343, 554, 227),
+					vec3(213, 554, 227) },
+			std::vector{ 0, 1, 2, 3, 2, 1 },
+			light));
+
+	p_world->add(make_shared<mesh>(
+			std::vector{
+					vec3(0, 0, 0),
+					vec3(555, 0, 0),
+					vec3(0, 0, 555),
+					vec3(555, 0, 555) },
+			std::vector{ 0, 1, 2, 3, 2, 1 },
+			white));
+
+	p_world->add(make_shared<mesh>(
+			std::vector{
+					vec3(555, 555, 555),
+					vec3(0, 555, 555),
+					vec3(555, 555, 0),
+					vec3(0, 555, 0) },
+			std::vector{ 0, 1, 2, 3, 2, 1 },
+			white));
+
+	p_world->add(make_shared<mesh>(
+			std::vector{
+					vec3(0, 0, 555),
+					vec3(555, 0, 555),
+					vec3(0, 555, 555),
+					vec3(555, 555, 555) },
+			std::vector{ 0, 1, 2, 3, 2, 1 },
+			white));
+
+	p_world->add(make_shared<instance>(
+			primitives::cuboid(
+					vec3(0),
+					vec3(165),
+					white),
+			transform{
+					.orientation = quat(vec3(0, 1, 0), PI * -18.0f / 180.0f),
+					.translation = vec3(130, 0, 65),
+					.scale = 1,
+			}));
+
+	p_world->add(make_shared<instance>(
+			primitives::cuboid(
+					vec3(0),
+					vec3(165, 330, 165),
+					white),
+			transform{
+					.orientation = quat(vec3(0, 1, 0), PI * 15.0f / 180.0f),
+					.translation = vec3(265, 0, 295),
+					.scale = 1,
+			}));
 }
 
 int main(int argc, char *argv[]) {
@@ -152,10 +241,14 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	vec3 eye = vec3(0.5f, 1.0f, -2.0f);
-	vec3 target = vec3(0, 0, 0.0f);
+	vec3 eye = vec3(278, 278, -800);
+	// vec3 eye = vec3(0.5f, 1.0f, -2.0f);
+	vec3 target = vec3(278, 278, 0);
+	// vec3 target = vec3(0, 0, 0.0f);
+	float vfov = 40.0f;
+	// float vfov = 60.0f;
 	float focal_length = (target - eye).length();
-	camera cam(eye, target, vec3(0, 1, 0), 60.0f, (float)config.WIDTH / (float)config.HEIGHT,
+	camera cam(eye, target, vec3(0, 1, 0), vfov, (float)config.WIDTH / (float)config.HEIGHT,
 			0.0f, focal_length);
 
 	std::vector<vec3> verts;
@@ -194,7 +287,7 @@ int main(int argc, char *argv[]) {
 
 	world wrld;
 
-	create_custom_map(&wrld);
+	create_cornell_box(&wrld);
 
 	wrld.compile();
 

@@ -6,6 +6,8 @@
 #include <ostream>
 #include <tuple>
 
+#include "vec3.h"
+
 class quat {
 	float e[4];
 

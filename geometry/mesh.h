@@ -40,6 +40,10 @@ public:
 	const aabb &get_aabb() const override;
 };
 
-mesh import_obj(const std::filesystem::path& filepath, std::shared_ptr<material> mat);
+std::shared_ptr<mesh> import_obj(const std::filesystem::path &filepath, std::shared_ptr<material> mat);
+
+namespace primitives {
+  std::shared_ptr<mesh> cuboid(const vec3& min, const vec3& max, std::shared_ptr<material> mat);
+};
 
 #endif // _MESH_H
