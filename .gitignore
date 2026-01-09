@@ -6,5 +6,5 @@
 .vs
 .vscode
 ignore*
-.cache
-.direnv
+.cache/
+.direnv/
